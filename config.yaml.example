@@ -1,0 +1,11 @@
+# RaspberryPi-ThinClient Configuration
+# Copy this file to config.yaml and update with your settings
+
+# Proxmox Authentication
+pve-username: "user@pam"          # Format: username@realm (pam, pve, etc)
+pve-password: "your-password"     # Your Proxmox password
+
+# Proxmox Connection Details
+pve-proxy: "192.168.1.100"        # IP address or hostname of your Proxmox server
+pve-node: "pve"                   # Node name where the VM is running
+pve-vm-id: "100"                  # ID of the VM to connect to (must be a number)

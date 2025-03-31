@@ -1,0 +1,57 @@
+#!/bin/bash
+set -e
+
+# Function to show error message
+show_error() {
+    zenity --error --title="RaspberryPi-ThinClient Error" --text="$1"
+    exit 1
+}
+
+# Set auth options
+PASSWORD='{{ pve-password }}'
+USERNAME='{{ pve-username }}'
+
+# Set VM ID
+VMID="{{ pve-vm-id }}"
+
+# Set Node
+NODE="{{ pve-node }}"
+PROXY="{{ pve-proxy }}"
+
+
+# verify config
+if [ -z "$PASSWORD" ]; then
+    show_error "Proxmox password is not set."
+fi
+if [ -z "$USERNAME" ]; then
+    show_error "Proxmox username is not set."
+fi
+if [ -z "$VMID" ]; then
+    show_error "Proxmox VM ID is not set."
+fi
+if [ -z "$NODE" ]; then
+    show_error "Proxmox node is not set."
+fi
+if [ -z "$PROXY" ]; then
+    show_error "Proxmox proxy is not set."
+fi
+
+NODE="${NODE%%\.*}"
+
+DATA=$(curl -f -s -S -k --data-urlencode "username=$USERNAME" --data-urlencode "password=$PASSWORD" "https://$PROXY:8006/api2/json/access/ticket") || show_error "Failed to authenticate with Proxmox."
+
+echo "AUTH OK"
+
+TICKET="${DATA//\"/}"
+TICKET="${TICKET##*ticket:}"
+TICKET="${TICKET%%,*}"
+TICKET="${TICKET%%\}*}"
+
+CSRF="${DATA//\"/}"
+CSRF="${CSRF##*CSRFPreventionToken:}"
+CSRF="${CSRF%%,*}"
+CSRF="${CSRF%%\}*}"
+
+curl -f -s -S -k -b "PVEAuthCookie=$TICKET" -H "CSRFPreventionToken: $CSRF" "https://$PROXY:8006/api2/spiceconfig/nodes/$NODE/qemu/$VMID/spiceproxy" -d "proxy=$PROXY" > spiceproxy || show_error "Failed to fetch SPICE proxy configuration."
+
+exec remote-viewer -k --kiosk-quit on-disconnect spiceproxy || show_error "Failed to launch remote-viewer."

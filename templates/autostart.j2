@@ -1,0 +1,13 @@
+#Allow exit of X server with ctrl+alt+backspace
+#If you don't want to let the user terminate/restart, leave this out
+#You can always `killall xinit` via SSH to return to a terminal
+setxkbmap -option terminate:ctrl_alt_bksp
+
+#Start the shell script we already wrote in our home directory
+#Runloop restarts the thin client (new access token, new config file)
+#if the session is terminated (i.e the VM is inaccessible or restarts)
+#User will see a black screen with a cursor during this process
+while true
+do
+    ~/thinclient.sh
+done

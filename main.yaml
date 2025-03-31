@@ -1,0 +1,72 @@
+# Copyright (c) 2025 Damien Boisvert (AlphaGameDeveloper)
+# 
+# This software is released under the MIT License.
+# https://opensource.org/licenses/MIT
+
+---
+# ansible
+# This is a sample Ansible playbook that installs and configures a web server
+# and a database server on a target host.
+
+- name: Install and configure a Raspberry Pi to act as a Thin Client
+  hosts: all
+  become: true
+  vars_files:
+    - config.yaml
+  vars:
+    packages:
+      - xserver-xorg
+      - x11-xserver-utils
+      - xinit
+      - openbox
+      - zenity
+      - virt-viewer
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+    
+    # get list of packages that need updates
+    - name: Get list of packages that need updates
+      command: apt list --upgradable
+      register: upgradable_packages
+      changed_when: false
+    
+    - name: Update packages
+      apt:
+        name: "{{ item }}"
+        state: latest
+      loop: "{{ upgradable_packages.stdout_lines }}"
+      when: upgradable_packages.stdout_lines is defined
+      
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+    
+    - name: Enable auto-login
+      lineinfile:
+        line: "autologin-user={{ ansible_user }}"
+        file: /etc/lightdm/lightdm.conf
+        state: present
+    
+    - name: Create startup script
+      template:
+        src: thinclient.sh.j2
+        dest: /home/{{ ansible_user }}/thinclient.sh
+        mode: '0755' # perms: rwxr-xr-x
+
+    - name: Create autostart file
+      template:
+        src: autostart.j2
+        dest: /etc/xdg/openbox/autostart
+      
+    - name: Add startup to .bash_profile
+      lineinfile:
+        line: "[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx --"
+        file: /home/{{ ansible_user }}/.bash_profile
+        insertafter: EOF
+        state: present
