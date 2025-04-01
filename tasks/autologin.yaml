@@ -1,0 +1,25 @@
+---
+# Configure auto-login using systemd
+
+- name: Set default target to multi-user.target
+  shell: systemctl set-default multi-user.target
+  
+- name: Create symbolic link for getty service
+  file:
+    src: /lib/systemd/system/getty@.service
+    dest: /etc/systemd/system/getty.target.wants/getty@tty1.service
+    state: link
+    force: yes
+
+- name: Ensure directory exists for override
+  file:
+    path: /etc/systemd/system/getty@tty1.service.d
+    state: directory
+    
+- name: Configure auto-login
+  copy:
+    dest: /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=-/sbin/agetty --autologin {{ ansible_user }} --noclear %I $TERM

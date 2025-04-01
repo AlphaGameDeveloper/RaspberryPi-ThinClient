@@ -28,30 +28,14 @@
         update_cache: yes
         cache_valid_time: 3600
     
-    # get list of packages that need updates
-    - name: Get list of packages that need updates
-      command: apt list --upgradable
-      register: upgradable_packages
-      changed_when: false
-    
-    - name: Update packages
-      apt:
-        name: "{{ item }}"
-        state: latest
-      loop: "{{ upgradable_packages.stdout_lines }}"
-      when: upgradable_packages.stdout_lines is defined
-      
     - name: Install required packages
       apt:
         name: "{{ item }}"
         state: present
       loop: "{{ packages }}"
     
-    - name: Enable auto-login
-      lineinfile:
-        line: "autologin-user={{ ansible_user }}"
-        file: /etc/lightdm/lightdm.conf
-        state: present
+    - name: Configure auto-login
+      import_tasks: tasks/autologin.yaml
     
     - name: Create startup script
       template:
@@ -67,6 +51,7 @@
     - name: Add startup to .bash_profile
       lineinfile:
         line: "[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx --"
-        file: /home/{{ ansible_user }}/.bash_profile
+        path: /home/{{ ansible_user }}/.bash_profile
         insertafter: EOF
+        create: true
         state: present

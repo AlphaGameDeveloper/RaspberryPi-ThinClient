@@ -1,0 +1,2 @@
+[all]
+10.133.128.138 ansible_user=penguin pve_vm_id=100

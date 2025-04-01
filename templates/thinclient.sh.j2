@@ -3,21 +3,20 @@ set -e
 
 # Function to show error message
 show_error() {
-    zenity --error --title="RaspberryPi-ThinClient Error" --text="$1"
+    zenity --error --title="RaspberryPi-ThinClient Error" --text="$1" --footer-text="Please check your configuration." --no-wrap --width=300 --height=100
     exit 1
 }
 
 # Set auth options
-PASSWORD='{{ pve-password }}'
-USERNAME='{{ pve-username }}'
+PASSWORD='{{ pve_password }}'
+USERNAME='{{ pve_username }}'
 
 # Set VM ID
-VMID="{{ pve-vm-id }}"
+VMID="{{ pve_vm_id }}"
 
 # Set Node
-NODE="{{ pve-node }}"
-PROXY="{{ pve-proxy }}"
-
+NODE="{{ pve_node }}"
+PROXY="{{ pve_proxy }}"
 
 # verify config
 if [ -z "$PASSWORD" ]; then
