@@ -8,5 +8,3 @@ pve_password: "your-password"     # Your Proxmox password
 # Proxmox Connection Details
 pve_proxy: "192.168.1.100"        # IP address or hostname of your Proxmox server
 pve_node: "pve"                   # Node name where the VM is running
-pve_vm_id: "100"                  # ID of the VM to connect to (must be a number)
-
