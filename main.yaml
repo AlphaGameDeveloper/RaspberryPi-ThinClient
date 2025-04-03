@@ -4,10 +4,6 @@
 # https://opensource.org/licenses/MIT
 
 ---
-# ansible
-# This is a sample Ansible playbook that installs and configures a web server
-# and a database server on a target host.
-
 - name: Install and configure a Raspberry Pi to act as a Thin Client
   hosts: all
   become: true
